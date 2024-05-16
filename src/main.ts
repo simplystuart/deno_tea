@@ -1,11 +1,9 @@
 import { Result } from "./core.ts";
-import { Cmd, Port, Program, worker } from "./platform.ts";
+import { Cmd, Program, port, worker } from "./platform.ts";
 
 // PORTS
 
-const ports = {
-  log: (message: string) => Promise.resolve(console.log({ message }) as Port),
-};
+const log = port("log");
 
 // MODEL
 
@@ -47,9 +45,9 @@ const update = (msg: Msg, model: Model): [Model, Cmd<Msg>] => {
           const model_ = { kind: "loaded", result: msg.result } as Model;
 
           if (msg.result.kind === "ok") {
-            return [model_, [ports.log(JSON.stringify(msg.result.value))]];
+            return [model_, [log(JSON.stringify(msg.result.value))]];
           } else {
-            return [model_, [ports.log(JSON.stringify(msg.result.error))]];
+            return [model_, [log(JSON.stringify(msg.result.error))]];
           }
         }
         default:
@@ -63,7 +61,9 @@ const update = (msg: Msg, model: Model): [Model, Cmd<Msg>] => {
 
 // MAIN
 
-export const main = worker(Deno.args, {
+const main = worker(Deno.args, {
   init,
   update,
 } as Program<string[], Model, Msg>);
+
+main.log.subscribe(console.info);
