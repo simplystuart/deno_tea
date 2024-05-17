@@ -44,6 +44,7 @@ const worker = <flags, model, msg>(
 
   (async () => {
     do {
+      // TODO: non-blocking loop; run cmds in parallel
       const cmd = cmds.shift();
 
       if (cmd) {
